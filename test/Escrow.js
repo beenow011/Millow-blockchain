@@ -20,6 +20,12 @@ describe('Escrow', () => {
 
         const Escrow = await ethers.getContractFactory('Escrow')
         escrow = await Escrow.deploy(realEstate.address, lender.address, inspector.address, seller.address)
+
+        transaction = await realEstate.connect(seller).approve(escrow.address, 1)
+        await transaction.wait()
+
+        transaction = await escrow.connect(seller).list(1)
+        await transaction.wait()
     })
     describe('Deployment', async () => {
 
@@ -41,6 +47,22 @@ describe('Escrow', () => {
             const result = await escrow.lender()
             expect(result).to.equal(lender.address)
         })
+
+    })
+
+    describe('Listing', async () => {
+
+        it('Updates as listed', async () => {
+            const result = await escrow.isListed(1)
+            expect(result).to.equal(true)
+        })
+
+        it('Updates ownership', async () => {
+            expect(await realEstate.ownerOf(1)).to.equal(escrow.address)
+
+        })
+
+
 
     })
 
